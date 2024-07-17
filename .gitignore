@@ -1,0 +1,10 @@
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.sw?
+**/build
+**/.cache
+music/
+ids/
+misc/
