@@ -15,4 +15,4 @@ file(GLOB all_SRCS
 
 
 add_executable(wvtc_automation ${all_SRCS})
-
+target_link_libraries(wvtc_automation m dl pthread)
