@@ -111,6 +111,17 @@ int main(int argc, char *argv[]) {
 		 *
 		 *
 		 *
+		 * this section of the code parses metadata, spits out a log file, sends to RDS
+		 *
+		 *
+		 *
+		 *--------------------------------------------------------------------------------------
+		 */
+
+		/*--------------------------------------------------------------------------------------
+		 *
+		 *
+		 *
 		 *
 		 *this section of the code plays whatever the program decides is the current audio file!
 		 *
