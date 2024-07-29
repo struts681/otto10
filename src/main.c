@@ -7,8 +7,9 @@
 #include <libconfig.h>
 #include "miniaudio.h"
 
-#define FADE_DURATION 4 //in seconds as an integer
-#define REPETITION_LIMIT 8 //how many songs before we don't care if a repeat is selected
+#define DEFAULT_FADE_DURATION 2 //in seconds as an integer
+#define DEFAULT_REPETITION_LIMIT 8 //how many songs before we don't care if a repeat is selected
+				   //wait those two should totally be in the conf file instead
 #define DEFAULT_CONFIG_FILE "otto10.conf" //set a default config file if none is specified in the arguments
 
 //config config config
@@ -37,11 +38,6 @@ ma_sound segue_sound;
 float length_seconds;
 float current_time_seconds;
 float remaining_time;
-
-//avoid immediate repeats
-int last_songs_played[REPETITION_LIMIT];
-int last_ids_played[REPETITION_LIMIT];
-int last_segues_played[REPETITION_LIMIT];
 
 //flags for IDs and config stuff
 uint8_t program_flags = 0x00;
@@ -74,6 +70,16 @@ int main(int argc, char *argv[]) {
 	//char musicpath[] = (code that reads from the config)
 	//char idpath[] = ...;
 	//char seguepath[] = ...;
+
+	//add some if statements here to check if its defined in the conf file
+	int repetition_limit = DEFAULT_REPETITION_LIMIT;
+	int fade_duration = DEFAULT_FADE_DURATION;
+
+	//avoid immediate repeats
+	int last_songs_played[repetition_limit];
+	int last_ids_played[repetition_limit];
+	int last_segues_played[repetition_limit];
+	//these all go here because the conf file might change them
 
 	while(1) {
 
@@ -147,7 +153,7 @@ int main(int argc, char *argv[]) {
 		else printf("successfully initialized a sound from %s\n", soundpath);
 
 		//apply a fade in from 0 to 1 of some number of milliseconds(2000)
-		ma_sound_set_fade_in_milliseconds(&sound, 0, 1, FADE_DURATION * 1000);
+		ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
 		//start playing it!
 		ma_sound_start(&sound);
 
@@ -170,9 +176,9 @@ int main(int argc, char *argv[]) {
 			//fflush makes sure stdout isnt doing anything wacky so it looks right
 
 			usleep(10000);
-		} while(remaining_time > FADE_DURATION);
+		} while(remaining_time > fade_duration);
 
-		ma_sound_set_fade_in_milliseconds(&sound, -1, 0, FADE_DURATION * 1000);
+		ma_sound_set_fade_in_milliseconds(&sound, -1, 0, fade_duration  * 1000);
 
 
 		//cleanup because we try to be good programmers here!
