@@ -3,7 +3,7 @@ c otto :3
 
 
 todo:
-- [ ] make it play audio
+- [x] make it play audio
 - [ ] make it read metadata from a thing
 - [ ] make it create a database from a directory
 - [ ] make it select and play files from that database
