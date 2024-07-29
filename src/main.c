@@ -9,6 +9,10 @@
 
 #define FADE_DURATION 4 //in seconds as an integer
 #define REPETITION_LIMIT 8 //how many songs before we don't care if a repeat is selected
+#define DEFAULT_CONFIG_FILE "otto10.conf" //set a default config file if none is specified in the arguments
+
+//config config config
+char *otto_config_file;
 
 //will not exist after alpha testing
 char soundpath[] = "/home/amelia/test.mp3";
@@ -42,7 +46,9 @@ int last_segues_played[REPETITION_LIMIT];
 //flags for IDs and config stuff
 uint8_t program_flags = 0x00;
 
-int main() {
+int main(int argc, char *argv[]) {
+
+	printf("meow\n");
 
 	/*----------------------------------------------------------------------------
 	 *
@@ -55,6 +61,14 @@ int main() {
 	 *
 	 *----------------------------------------------------------------------------
 	 */
+
+	if(argc > 1) {
+		otto_config_file = argv[1];
+	}
+	else otto_config_file = DEFAULT_CONFIG_FILE;
+
+	printf("otto10 starting with config file: %s\n", otto_config_file);
+
 
 	char musicpath[] = "/home/amelia/music/otto10/";
 	//char musicpath[] = (code that reads from the config)
