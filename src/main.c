@@ -8,10 +8,21 @@
 #include <libconfig.h>
 #include "miniaudio.h"
 
+
+#define ever ;; //hehe
+
 #define DEFAULT_FADE_DURATION 2 //in seconds as an integer
 #define DEFAULT_REPETITION_LIMIT 8 //how many songs before we don't care if a repeat is selected
 				   //wait those two should totally be in the conf file instead
 #define DEFAULT_CONFIG_FILE "otto10.conf" //set a default config file if none is specified in the arguments
+					  
+#define DEFAULT_MUSIC_CSV "music.csv"
+#define DEFAULT_ID_CSV "ids.csv"
+#define DEFAULT_SEGUE_CSV "segues.csv"
+
+#define DEFAULT_MUSIC_DIR "/home/amelia/otto10/music/"
+#define DEFAULT_ID_DIR "/home/amelia/otto10/ids/"
+#define DEFAULT_SEGUE_DIR "/home/amelia/otto10/segues"
 
 
 //program flow:
@@ -66,8 +77,20 @@ enum state {
 //config config config
 char *otto_config_file;
 
-//will not exist after alpha testing
-char soundpath[] = "/home/amelia/test.mp3";
+//variables that store the location of things
+char *music_dir;
+char *id_dir;
+char *segue_dir;
+
+char *music_csv;
+char *id_csv;
+char *segue_csv;
+
+char *sound_path = "/home/amelia/test.mp3";
+
+int music_csv_size_in_lines;
+int id_csv_size_in_lines;
+int segue_csv_size_in_lines;
 
 //all the miniaudio stuff - main sound
 ma_result ma_status;
@@ -116,15 +139,83 @@ int main(int argc, char *argv[]) {
 	 *----------------------------------------------------------------------------
 	 */
 
+	/*
+	 *
+	 * below: sets all the paths if not otherwise specified
+	 *
+	 */
+
+	//set default config file as defined, if none is specified in arguments
 	if(argc > 1) {
 		otto_config_file = argv[1];
 	}
 	else otto_config_file = DEFAULT_CONFIG_FILE;
 
-	printf("otto10 starting with config file: %s\n", otto_config_file);
+	//set default music library directory if not specified in arguments
+	if(0) {
+		//music_dir = ;
+	}
+	else music_dir = DEFAULT_MUSIC_DIR;
+
+	//set id directory as above
+	if(0) {
+		//id_dir = ;
+	}
+	else id_dir = DEFAULT_ID_DIR;
+
+	//set segue directory as above
+	if(0) {
+		//segue_dir = ;
+	}
+	else segue_dir = DEFAULT_SEGUE_DIR;
+
+	if(0) {
+		//music_csv = ;
+	}
+	else music_csv = DEFAULT_MUSIC_CSV;
+
+	if(0) {
+		//id_csv = ;
+	}
+	else id_csv = DEFAULT_ID_CSV;
+
+	if(0) {
+		//segue_csv = ;
+	}
+	else segue_csv = DEFAULT_SEGUE_CSV;
+
+	/*
+	 *
+	 * below: count lines in all the csv files so we can randomize good
+	 *
+	 */
+
+	music_csv_size_in_lines = count_file_lines(music_csv);
+	if(music_csv_size_in_lines = -1) return -1;
+
+	id_csv_size_in_lines = count_file_lines(id_csv);
+	if(id_csv_size_in_lines = -1) return -1;
+
+	segue_csv_size_in_lines = count_file_lines(segue_csv);
 
 
-	char musicpath[] = "/home/amelia/music/otto10/";
+	printf("otto10 starting with \n"
+			"config file:    %s \n"
+			"music database: %s \n"
+			"id database:    %s \n"
+			"segue database: %s \n"
+			"music path:     %s \n"
+			"id path:        %s \n"
+			"segue path:     %s \n",
+			otto_config_file,
+			music_csv,
+			id_csv,
+			segue_csv,
+			music_dir,
+			id_dir,
+			segue_dir);
+
+
 	//char musicpath[] = (code that reads from the config)
 	//char idpath[] = ...;
 	//char seguepath[] = ...;
@@ -139,7 +230,7 @@ int main(int argc, char *argv[]) {
 	int last_segues_played[repetition_limit];
 	//these all go here because the conf file might change them
 
-	while(1){
+	for(ever){
 		mark_1 = clock();
 
 		switch(program_state) {
@@ -206,6 +297,8 @@ int main(int argc, char *argv[]) {
 				 *---------------------------------------------------------------------------------
 				 */
 
+
+
 				/*---------------------------------------------------------------------------------
 				 *
 				 *
@@ -240,12 +333,12 @@ int main(int argc, char *argv[]) {
 				else printf("successfully initialized miniaudio\n");
 
 				//initialize a sound from the audio file selected
-				ma_status = ma_sound_init_from_file(&engine, soundpath, 0, NULL, NULL, &sound);
+				ma_status = ma_sound_init_from_file(&engine, sound_path , 0, NULL, NULL, &sound);
 				if(ma_status != MA_SUCCESS) {
 					printf("sound init failed : %s\n", ma_status);
 					return -1;
 				}
-				else printf("successfully initialized a sound from %s\n", soundpath);
+				else printf("successfully initialized a sound from %s\n", sound_path);
 
 				//apply a fade in from 0 to 1 of some number of milliseconds(2000)
 				ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
@@ -269,4 +362,60 @@ int main(int argc, char *argv[]) {
 
 	}
 }
+
+
+
+int get_random_song() {
+	FILE *stream = fopen(music_csv, "r");
+
+
+}
+
+int get_song_from_index(uint32_t song_index, char *song_str) {
+
+}
+
+int get_random_id() {
+
+}
+
+int get_random_segue() {
+
+}
+
+
+const char* get_csv_field(char *line, int num) {
+
+}
+
+int count_file_lines(const char *input_file) {
+	printf("func begin\n");
+	FILE *fp = fopen(input_file, "r");
+	if(fp == NULL) {
+		printf("null file pointer - does music csv file exist?\n\n");
+				return -1;
+				}
+
+	char buf[4096];
+	int lines = 0;
+	
+	printf("1");
+
+	for(ever) {
+		size_t res = fread(buf, 1, 65536, fp);
+		if(ferror(fp)) return -1;
+
+		for(int i = 0; i < res; i++) {
+			if(buf[i] == '\n') lines++;
+
+		}
+		if(feof(fp)) break;
+
+	}
+	fclose(fp);
+	return lines;
+}
+
+
+//int generate_csv_database(char *database, char *filepath) {
 

@@ -3,6 +3,7 @@
 *.flac
 *.ogg
 *.sw?
+*.csv
 **/build
 **/.cache
 music/
