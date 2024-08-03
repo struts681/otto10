@@ -191,7 +191,14 @@ int main(int argc, char *argv[]) {
 	 */
 
 	music_csv_size_in_lines = count_file_lines(music_csv);
-	if(music_csv_size_in_lines = -1) return -1;
+	if(music_csv_size_in_lines = -1) {
+		FILE *fp = fopen(music_csv, "w");
+		printf("no music db found. creating one...\n");
+		if(fp == NULL) return -1;
+
+		process_directory(music_dir, fp);
+	}
+
 
 	id_csv_size_in_lines = count_file_lines(id_csv);
 	if(id_csv_size_in_lines = -1) return -1;
@@ -363,59 +370,4 @@ int main(int argc, char *argv[]) {
 	}
 }
 
-
-
-int get_random_song() {
-	FILE *stream = fopen(music_csv, "r");
-
-
-}
-
-int get_song_from_index(uint32_t song_index, char *song_str) {
-
-}
-
-int get_random_id() {
-
-}
-
-int get_random_segue() {
-
-}
-
-
-const char* get_csv_field(char *line, int num) {
-
-}
-
-int count_file_lines(const char *input_file) {
-	printf("func begin\n");
-	FILE *fp = fopen(input_file, "r");
-	if(fp == NULL) {
-		printf("null file pointer - does music csv file exist?\n\n");
-				return -1;
-				}
-
-	char buf[4096];
-	int lines = 0;
-	
-	printf("1");
-
-	for(ever) {
-		size_t res = fread(buf, 1, 65536, fp);
-		if(ferror(fp)) return -1;
-
-		for(int i = 0; i < res; i++) {
-			if(buf[i] == '\n') lines++;
-
-		}
-		if(feof(fp)) break;
-
-	}
-	fclose(fp);
-	return lines;
-}
-
-
-//int generate_csv_database(char *database, char *filepath) {
 
