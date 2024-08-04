@@ -12,6 +12,7 @@
 #define MAX_PATH_SIZE 4096
 
 void write_to_csv(FILE *fp, const char *file) {
+	printf("entering write to csv function for file %s\n", file);
 	char file_path[MAX_PATH_SIZE];
 	char song_name[MAX_PATH_SIZE];
 	char artist_name[MAX_PATH_SIZE];
@@ -39,7 +40,9 @@ void write_to_csv(FILE *fp, const char *file) {
 							    //this gives us the directory!
 	}
 
-	fprintf(fp, "\"%s\",\"%s\",\"%s\"", file_path, song_name, artist_name);
+	fprintf(fp, "\"%s\",\"%s\",\"%s\"\n", file_path, song_name, artist_name);
+	fflush(fp);
+	printf("written to csv: \"%s\",\"%s\",\"%s\"\n", file_path, song_name, artist_name);
 }
 
 void process_directory(const char *dir, FILE *fp) {
@@ -67,10 +70,13 @@ void process_directory(const char *dir, FILE *fp) {
 			process_directory(path, fp); //recurse!
 		}
 		else {
+			printf("processing file %s ", path);
 			char *ext = strrchr(entry->d_name, '.'); //look for the last . for the extension
-			if(ext && !(strcasecmp(ext, ".wav") || //is it a wav?
-						!strcasecmp(ext, ".flac")   || //a flac?
-						!strcasecmp(ext, ".mp3"))) {   //an mp3?
+			printf("with extension %s\n", ext);
+			if(ext && (strcasecmp(ext, ".wav") == 0 || //is it a wav?
+						strcasecmp(ext, ".flac") == 0|| //a flac?
+						strcasecmp(ext, ".mp3")  == 0)) {   //an mp3?
+				printf("writing it to a csv\n");
 				write_to_csv(fp, path);//if so, you may be entitled to financial compensation
 			}
 		}
@@ -81,21 +87,22 @@ void process_directory(const char *dir, FILE *fp) {
 
 
 int count_file_lines(const char *input_file) {
-	printf("func begin\n");
 	FILE *fp = fopen(input_file, "r");
 	if(fp == NULL) {
-		printf("null file pointer - does csv file exist?\n\n");
-				return 1;
+		printf("null file pointer - does csv file exist?\n");
+				return -1;
 				}
 
 	char buf[4096];
 	int lines = 0;
 	
-	printf("1");
-
 	for(ever) {
-		size_t res = fread(buf, 1, 65536, fp);
-		if(ferror(fp)) return -1;
+		size_t res = fread(buf, 1, sizeof(buf), fp);
+		if(ferror(fp)) {
+			printf("error counting file lines\n");
+			fclose(fp);
+			return -1;
+		}
 
 		for(int i = 0; i < res; i++) {
 			if(buf[i] == '\n') lines++;
@@ -108,3 +115,44 @@ int count_file_lines(const char *input_file) {
 	return lines;
 }
 
+#define NUM_FIELDS 3
+int read_from_csv(const char *filename, int line_number, char *result[NUM_FIELDS]) {
+	FILE *fp = fopen(filename, "r");
+	if(fp == NULL) {
+		printf("error: failed to open file: %s\n", filename);
+		return -1;
+	}
+
+	char line[MAX_PATH_SIZE];
+	int line_tracker = 0;
+
+	while(fgets(line, sizeof(line), fp)) {
+		if(line_tracker == line_number) {
+			char *token = strtok(line, ",");
+			int field = 0;
+			while(token && (field < NUM_FIELDS)) {
+				result[field] = strdup(token);
+				if(result[field] == NULL) {
+					printf("could not pull token from file");
+					fclose(fp);
+					return -1;
+				}
+				result[field][strcspn(result[field], "\r\n")] = '\0'; //idk what the hell this
+										      //but the internet helped
+				token = strtok(NULL, ",");
+				field++;
+			}
+			fclose(fp);
+			return 0;
+		}
+		line_tracker++;
+	}
+	fclose(fp);
+	return -1;
+}
+
+void free_csv_result(char *result[NUM_FIELDS]) {
+	for(int i = 0; i < NUM_FIELDS; i++) {
+		free(result[i]);
+	}
+}
