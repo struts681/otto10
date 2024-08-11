@@ -7,7 +7,7 @@
 #include <string.h>
 #include <libconfig.h>
 #include "miniaudio.h"
-
+#include "defs.h"
 
 #define ever ;; //hehe
 
@@ -25,6 +25,8 @@
 #define DEFAULT_MUSIC_DIR "/home/amelia/otto10/music/"
 #define DEFAULT_ID_DIR "/home/amelia/otto10/ids/"
 #define DEFAULT_SEGUE_DIR "/home/amelia/otto10/segues/"
+
+
 
 
 //program flow:
@@ -100,7 +102,7 @@ int segue_csv_size_in_lines;
 ma_result ma_status;
 ma_engine engine;
 ma_sound sound;
-ma_uint64 length_pcm_frames;
+//ma_uint64 length_pcm_frames;
 ma_uint64 current_time_pcm_frames;
 
 //miniaudio stuff - segue sound for in between
@@ -113,7 +115,7 @@ ma_sound segue_sound;
 //ma_sound spare_sound;
 
 //for timing what to play
-float length_seconds;
+double length_seconds;
 float current_time_seconds;
 float remaining_time;
 
@@ -307,8 +309,8 @@ int main(int argc, char *argv[]) {
 					fflush(stdout);
 
 					if(remaining_time < 0.01) {
-						ma_engine_uninit(&engine);
-						ma_sound_uninit(&sound);
+					//	ma_engine_uninit(&engine);
+					//	ma_sound_uninit(&sound);
 					}
 				}
 				else {
@@ -493,37 +495,16 @@ int main(int argc, char *argv[]) {
 				 *
 				 *---------------------------------------------------------------------------------
 				 */
-				//initialize the miniaudio engine!
-				ma_status = ma_engine_init(NULL, &engine);
-				if(ma_status != MA_SUCCESS) {
-					printf("engine init failed : %s\n", ma_status);
-					return -1;
-				}//check for any failures
-				else printf("successfully initialized miniaudio\n");
-
-				//initialize a sound from the audio file selected
-				printf("initializing miniaudio sound from: %s\n", sound_path);
-				ma_status = ma_sound_init_from_file(&engine, sound_path , 0, NULL, NULL, &sound);
-				if(ma_status != MA_SUCCESS) {
-					printf("sound init failed : %s\n", ma_status);
-					return -1;
-				}
-				else printf("successfully initialized a sound from %s\n", sound_path);
-
-				//apply a fade in from 0 to 1 of some number of milliseconds(2000)
-				ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
-				//start playing it!
-				ma_sound_start(&sound);
-
-
-				//check the total length of whats playing and then convert it to seconds as a float
-				ma_sound_get_length_in_pcm_frames(&sound, &length_pcm_frames);
-				length_seconds = (float)length_pcm_frames / (float)ma_engine_get_sample_rate(&engine);
+				length_seconds = play_song(&engine, &sound, sound_path, fade_duration);
+				//length_seconds = make_float_number();
+				printf("duration: %2.2f\n", length_seconds);
 
 				program_state = TIME_WATCH;
 				break;
 
 		}
+
+		//end switch
 
 		//repeat the loop only every 10ms
 		do {
@@ -535,15 +516,4 @@ int main(int argc, char *argv[]) {
 
 
 
-void trim_quotes(char *str) {
-	size_t len = strlen(str); 
-	if (len > 0 && str[0] == '"') {
-		memmove(str, str + 1, len - 1);
-		str[len - 1] = '\0';
-		len--;
-	}
 
-	if (len > 0 && str[len - 1] == '"') {
-		str[len - 1] = '\0';
-	}
-}
