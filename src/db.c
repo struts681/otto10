@@ -116,7 +116,7 @@ int count_file_lines(const char *input_file) {
 }
 
 #define NUM_FIELDS 3
-int read_from_csv(const char *filename, int line_number, char *result[NUM_FIELDS]) {
+int read_from_csv(const char *filename, int line_number, char **result) {
 	FILE *fp = fopen(filename, "r");
 	if(fp == NULL) {
 		printf("error: failed to open file: %s\n", filename);
@@ -151,7 +151,7 @@ int read_from_csv(const char *filename, int line_number, char *result[NUM_FIELDS
 	return -1;
 }
 
-void free_csv_result(char *result[NUM_FIELDS]) {
+void free_csv_result(char **result) {
 	for(int i = 0; i < NUM_FIELDS; i++) {
 		free(result[i]);
 	}
