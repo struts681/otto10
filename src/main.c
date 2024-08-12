@@ -22,7 +22,7 @@
 #define DEFAULT_ID_CSV "/home/amelia/otto10/database/ids.csv"
 #define DEFAULT_SEGUE_CSV "/home/amelia/otto10/database/segues.csv"
 
-#define DEFAULT_MUSIC_DIR "/home/amelia/otto10/music/"
+#define DEFAULT_MUSIC_DIR "/home/amelia/Music/"
 #define DEFAULT_ID_DIR "/home/amelia/otto10/ids/"
 #define DEFAULT_SEGUE_DIR "/home/amelia/otto10/segues/"
 
@@ -116,7 +116,7 @@ ma_sound segue_sound;
 
 //for timing what to play
 double length_seconds;
-float current_time_seconds;
+//float current_time_seconds;
 float remaining_time;
 
 //flags for IDs and config stuff
@@ -199,19 +199,8 @@ int main(int argc, char *argv[]) {
 	music_csv_size_in_lines = count_file_lines(music_csv);
 	if(music_csv_size_in_lines == -1) {
 
-		remove(music_csv);
+		recreate_csv_db(music_dir, music_csv);
 
-		FILE *fp = fopen(music_csv, "w");
-		printf("no music db found. creating one at %s...\n", music_csv);
-		if(fp == NULL) {
-			printf("failed to open file %s\n", music_csv);
-			return -1;
-		}
-
-		printf("opening file %s for directory %s\n", music_csv, music_dir);
-		process_directory(music_dir, fp);
-
-		fclose(fp);
 		music_csv_size_in_lines = count_file_lines(music_csv);
 		printf("%i lines found.\n", music_csv_size_in_lines);
 	}
@@ -301,218 +290,88 @@ int main(int argc, char *argv[]) {
 				//get current time! from the cursor
 
 				if(ma_sound_is_playing(&sound)) {
-					ma_sound_get_cursor_in_pcm_frames(&sound, &current_time_pcm_frames);
-					current_time_seconds = (float)current_time_pcm_frames / (float)ma_engine_get_sample_rate(&engine);
 
-					remaining_time = length_seconds - current_time_seconds;
-					printf("\rRemaining time: %02i:%02i \r", (int)remaining_time/60, (int)remaining_time%60);
-					fflush(stdout);
+					remaining_time = remaining_time_in_sound(&engine, &sound);
+				}
 
-					if(remaining_time < 0.01) {
-					//	ma_engine_uninit(&engine);
-					//	ma_sound_uninit(&sound);
+					else {
+						program_flags = 0;
+						program_state = FILE_SELECT;
+						printf("nothing is playing. selecting the next file.\n");
 					}
-				}
-				else {
-					program_flags = 0;
-					program_state = FILE_SELECT;
-					printf("nothing is playing. selecting the next file.\n");
-				}
 
-				break;
+					break;
 
-			case ID_START:
+					case ID_START:
 
-				/*
-				 * 
-				 *
-				 * this section plays a station ID when necessary
-				 *
-				 *
-				 *
-				 */
+					/*
+					 * 
+					 *
+					 * this section plays a station ID when necessary
+					 *
+					 *
+					 *
+					 */
 
-				break;
-			case FILE_SELECT:
-				/*---------------------------------------------------------------------------------
-				 *
-				 *
-				 *
-				 *this section of the code checks if any flags are up and selects 
-				 *an audio file to play!
-				 *also puts the relevant flag back down after selecting a file
-				 *note: order of precedence for flags?
-				 *also: this section of code selects what the next segue will be
-				 *whether a segue will be played or not.
-				 *
-				 *
-				 *---------------------------------------------------------------------------------
-				 */
+					break;
+					case FILE_SELECT:
+					/*---------------------------------------------------------------------------------
+					 *
+					 *
+					 *
+					 *this section of the code checks if any flags are up and selects 
+					 *an audio file to play!
+					 *also puts the relevant flag back down after selecting a file
+					 *note: order of precedence for flags?
+					 *also: this section of code selects what the next segue will be
+					 *whether a segue will be played or not.
+					 *
+					 *
+					 *---------------------------------------------------------------------------------
+					 */
 
-				//int flags = parse_flags(program_flags);
-				uint32_t mask =  0x00000001;
-				uint32_t tmp_mask = 0x00000000;
-				for(int i = 0; i < 33; i++) {
-					if(program_flags & mask) {
-						switch (i) {
-							case 0:
-								//select id!
-								break;
-							case 1:
-								//select segue!
-								break;
-							case 2:
-								// Code for i == 2
-								break;
-							case 3:
-								// Code for i == 3
-								break;
-							case 4:
-								// Code for i == 4
-								break;
-							case 5:
-								// Code for i == 5
-								break;
-							case 6:
-								// Code for i == 6
-								break;
-							case 7:
-								// Code for i == 7
-								break;
-							case 8:
-								// Code for i == 8
-								break;
-							case 9:
-								// Code for i == 9
-								break;
-							case 10:
-								// Code for i == 10
-								break;
-							case 11:
-								// Code for i == 11
-								break;
-							case 12:
-								// Code for i == 12
-								break;
-							case 13:
-								// Code for i == 13
-								break;
-							case 14:
-								// Code for i == 14
-								break;
-							case 15:
-								// Code for i == 15
-								break;
-							case 16:
-								// Code for i == 16
-								break;
-							case 17:
-								// Code for i == 17
-								break;
-							case 18:
-								// Code for i == 18
-								break;
-							case 19:
-								// Code for i == 19
-								break;
-							case 20:
-								// Code for i == 20
-								break;
-							case 21:
-								// Code for i == 21
-								break;
-							case 22:
-								// Code for i == 22
-								break;
-							case 23:
-								// Code for i == 23
-								break;
-							case 24:
-								// Code for i == 24
-								break;
-							case 25:
-								// Code for i == 25
-								break;
-							case 26:
-								// Code for i == 26
-								break;
-							case 27:
-								// Code for i == 27
-								break;
-							case 28:
-								// Code for i == 28
-								break;
-							case 29:
-								// Code for i == 29
-								break;
-							case 30:
-								// Code for i == 30
-								break;
-							case 31:
-								// Code for i == 31
-								break;
-							case 32:
-								// Code for i == 32
-								break;
-							default:
-								printf("this shouldnt be possible.");
-								break;
-						}	
-						mask <<= 1;
+					//int flags = parse_flags(program_flags);
+					if(!program_flags) {
+						printf("now selecting song.\n");
+						int song_selection = random_number(music_csv_size_in_lines);
+						printf("selected song #: %i of %i\n", song_selection, music_csv_size_in_lines);
+						if(read_from_csv(music_csv, song_selection, audio_info)) {
+							printf("error selecting a song.\n");
+							return -1;
+						}
+						trim_quotes(audio_info[0]);
+						trim_quotes(audio_info[2]);
+						snprintf(sound_path, sizeof(sound_path), "%s%s/%s", music_dir, audio_info[2], audio_info[0]);
+
+
+
+						program_state = AUDIO_START;
 					}
+
+					break;
+
+					case AUDIO_START:
+
+					//play_song returns the length in seconds as a float
+					length_seconds = play_song(&engine, &sound, sound_path, fade_duration);
+					printf("duration: %2.2f\n", length_seconds);
+
+					//go back to inactive mode
+					program_state = TIME_WATCH;
+
+					break;
+
 				}
 
-				if(!program_flags) {
-					printf("now selecting song.\n");
-					int song_selection = random_number(music_csv_size_in_lines);
-					printf("selected song #: %i of %i\n", song_selection, music_csv_size_in_lines);
-					if(read_from_csv(music_csv, song_selection, audio_info)) {
-						printf("error selecting a song.\n");
-						return -1;
-					}
-					trim_quotes(audio_info[0]);
-					trim_quotes(audio_info[2]);
-					snprintf(sound_path, sizeof(sound_path), "%s%s/%s", music_dir, audio_info[2], audio_info[0]);
+				//end switch
 
-
-
-					program_state = AUDIO_START;
-				}
-
-				break;
-
-			case AUDIO_START:
-				/*---------------------------------------------------------------------------------
-				 *
-				 *
-				 *
-				 *
-				 *this section of the code plays whatever the program decides is
-				 *the current audio file!
-				 *
-				 *
-				 *
-				 *
-				 *---------------------------------------------------------------------------------
-				 */
-				length_seconds = play_song(&engine, &sound, sound_path, fade_duration);
-				//length_seconds = make_float_number();
-				printf("duration: %2.2f\n", length_seconds);
-
-				program_state = TIME_WATCH;
-				break;
+				//repeat the loop only every 10ms
+				do {
+					mark_2 = clock();
+				} while(mark_2 < (mark_1 + 0.010));
 
 		}
-
-		//end switch
-
-		//repeat the loop only every 10ms
-		do {
-			mark_2 = clock();
-		} while(mark_2 < (mark_1 + 0.010));
-
 	}
-}
 
 
 

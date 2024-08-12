@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -156,3 +157,20 @@ void free_csv_result(char **result) {
 		free(result[i]);
 	}
 }
+
+
+
+int recreate_csv_db(char *_dir, char *_csv) {
+	remove(_csv);
+
+	FILE *fp = fopen(_csv, "w");
+	if(fp == NULL) {
+		perror("failed to open csv");
+		return -1;
+	}
+
+	process_directory(_dir, fp);
+
+	fclose(fp);
+}
+

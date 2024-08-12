@@ -1,6 +1,8 @@
 void trim_quotes(char *str);
 
 double play_song(ma_engine *_engine, ma_sound *_sound, char *_audio_file, int _fade);
+float remaining_time_in_sound(ma_engine *_engine, ma_sound *_sound);
+
 int random_number(int max);
 
 void write_to_csv(FILE *fp, const char *file);
@@ -9,3 +11,4 @@ int count_file_lines(const char *input_file);
 int read_from_csv(const char *filename, int line_number, char **result);
 void free_csv_result(char **result);
 
+int recreate_csv_db(char *_dir, char *_csv);
