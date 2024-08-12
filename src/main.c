@@ -102,7 +102,7 @@ int segue_csv_size_in_lines;
 ma_result ma_status;
 ma_engine engine;
 ma_sound sound;
-//ma_uint64 length_pcm_frames;
+ma_uint64 length_pcm_frames;
 ma_uint64 current_time_pcm_frames;
 
 //miniaudio stuff - segue sound for in between
@@ -292,86 +292,109 @@ int main(int argc, char *argv[]) {
 				if(ma_sound_is_playing(&sound)) {
 
 					remaining_time = remaining_time_in_sound(&engine, &sound);
+					printf("\r%2.2f remaining in the song", remaining_time);
 				}
 
-					else {
-						program_flags = 0;
-						program_state = FILE_SELECT;
-						printf("nothing is playing. selecting the next file.\n");
-					}
-
-					break;
-
-					case ID_START:
-
-					/*
-					 * 
-					 *
-					 * this section plays a station ID when necessary
-					 *
-					 *
-					 *
-					 */
-
-					break;
-					case FILE_SELECT:
-					/*---------------------------------------------------------------------------------
-					 *
-					 *
-					 *
-					 *this section of the code checks if any flags are up and selects 
-					 *an audio file to play!
-					 *also puts the relevant flag back down after selecting a file
-					 *note: order of precedence for flags?
-					 *also: this section of code selects what the next segue will be
-					 *whether a segue will be played or not.
-					 *
-					 *
-					 *---------------------------------------------------------------------------------
-					 */
-
-					//int flags = parse_flags(program_flags);
-					if(!program_flags) {
-						printf("now selecting song.\n");
-						int song_selection = random_number(music_csv_size_in_lines);
-						printf("selected song #: %i of %i\n", song_selection, music_csv_size_in_lines);
-						if(read_from_csv(music_csv, song_selection, audio_info)) {
-							printf("error selecting a song.\n");
-							return -1;
-						}
-						trim_quotes(audio_info[0]);
-						trim_quotes(audio_info[2]);
-						snprintf(sound_path, sizeof(sound_path), "%s%s/%s", music_dir, audio_info[2], audio_info[0]);
-
-
-
-						program_state = AUDIO_START;
-					}
-
-					break;
-
-					case AUDIO_START:
-
-					//play_song returns the length in seconds as a float
-					length_seconds = play_song(&engine, &sound, sound_path, fade_duration);
-					printf("duration: %2.2f\n", length_seconds);
-
-					//go back to inactive mode
-					program_state = TIME_WATCH;
-
-					break;
-
+				else {
+					program_flags = 0;
+					program_state = FILE_SELECT;
+					printf("nothing is playing. selecting the next file.\n");
 				}
 
-				//end switch
+				break;
 
-				//repeat the loop only every 10ms
-				do {
-					mark_2 = clock();
-				} while(mark_2 < (mark_1 + 0.010));
+			case ID_START:
+
+				/*
+				 * 
+				 *
+				 * this section plays a station ID when necessary
+				 *
+				 *
+				 *
+				 */
+
+				break;
+			case FILE_SELECT:
+				/*---------------------------------------------------------------------------------
+				 *
+				 *
+				 *
+				 *this section of the code checks if any flags are up and selects 
+				 *an audio file to play!
+				 *also puts the relevant flag back down after selecting a file
+				 *note: order of precedence for flags?
+				 *also: this section of code selects what the next segue will be
+				 *whether a segue will be played or not.
+				 *
+				 *
+				 *---------------------------------------------------------------------------------
+				 */
+
+				//int flags = parse_flags(program_flags);
+				if(!program_flags) {
+					printf("now selecting song.\n");
+					int song_selection = random_number(music_csv_size_in_lines);
+					printf("selected song #: %i of %i\n", song_selection, music_csv_size_in_lines);
+					if(read_from_csv(music_csv, song_selection, audio_info)) {
+						printf("error selecting a song.\n");
+						return -1;
+					}
+					trim_quotes(audio_info[0]);
+					trim_quotes(audio_info[2]);
+					snprintf(sound_path, sizeof(sound_path), "%s%s/%s", music_dir, audio_info[2], audio_info[0]);
+					printf("song: %s\n", sound_path);
+
+					program_state = AUDIO_START;
+				}
+
+				break;
+
+			case AUDIO_START:
+
+				//play_song returns the length in seconds as a float
+				//length_seconds = play_song(&engine, &sound, sound_path, fade_duration);
+				//printf("duration: %2.2f\n", length_seconds);
+
+
+				//init an engine
+				ma_status = ma_engine_init(NULL, &engine);
+				if(ma_status != MA_SUCCESS) {
+					perror("engine init failed");
+					return -1;
+				}
+				else printf("successfully initialized miniaudio engine\n");
+
+
+				//init the sound
+				printf("initializing miniaudio sound from %s\n", sound_path);
+				ma_status = ma_sound_init_from_file(&engine, sound_path, 0, NULL, NULL, &sound);
+				if(ma_status != MA_SUCCESS) {
+					perror("sound init failed\n");
+					return -1;
+				}
+				else printf("successfully initialized a sound from %s\n", sound_path);
+
+				//fade in & start
+				ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
+				ma_sound_start(&sound);
+
+				//go back to time watch mode
+				program_state = TIME_WATCH;
+
+				break;
 
 		}
+
+		//end switch
+
+		//repeat the loop only every 10ms
+		do {
+			mark_2 = clock();
+		} while(mark_2 < (mark_1 + 0.010));
+
 	}
+}
 
 
 

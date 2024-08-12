@@ -10,7 +10,7 @@
 
 
 //
-double play_song(ma_engine *_engine, ma_sound *_sound, char *_audio_file, int _fade) {
+float old_play_song(ma_engine *_engine, ma_sound *_sound, char *_audio_file, int _fade) {
 
 	ma_result _ma_status;
 	//init an engine
@@ -26,7 +26,7 @@ double play_song(ma_engine *_engine, ma_sound *_sound, char *_audio_file, int _f
 	printf("initializing miniaudio sound from %s\n", _audio_file);
 	_ma_status = ma_sound_init_from_file(_engine, _audio_file, 0, NULL, NULL, _sound);
 	if(_ma_status != MA_SUCCESS) {
-		perror("engine init failed\n");
+		perror("sound init failed\n");
 		return -1;
 	}
 	else printf("successfully initialized a sound from %s\n", _audio_file);
@@ -40,7 +40,7 @@ double play_song(ma_engine *_engine, ma_sound *_sound, char *_audio_file, int _f
 
 	ma_sound_get_length_in_pcm_frames(_sound, &_length_pcm_frames);
 	
-	double _pcm_frames = (double)_length_pcm_frames;
+	float _pcm_frames = (double)_length_pcm_frames;
 	double _sample_rate = (double)ma_engine_get_sample_rate(_engine);
 
 	printf("sample rate: %.2f", _sample_rate);
@@ -69,4 +69,32 @@ float remaining_time_in_sound(ma_engine *_engine, ma_sound *_sound) {
 
 
 	return _total_length_seconds - _cursor_time_seconds;
+}
+
+float play_song(ma_engine _engine, ma_sound _sound, char *_audio_file, int _fade) {
+
+	if(_audio_file == NULL) {
+		printf("null pointer aaaaa!\n");
+		return -3;
+	}
+
+	ma_result ma_status;
+
+	ma_status = ma_engine_init(NULL, &_engine);
+	if(ma_status != MA_SUCCESS) {
+		perror("error initializing ma engine\n");
+		return -1;
+	}
+	else printf("successfully initialized ma engine: audio file: %s\n");
+
+	ma_status = ma_sound_init_from_file(&_engine, _audio_file, 0, NULL, NULL, &_sound);
+	if(ma_status != MA_SUCCESS) {
+		perror("error initializing sound from file\n");
+		return -1;
+	}
+	else printf("successfully initialized sound from file: %s\n", _audio_file);
+
+	ma_sound_start(&_sound);
+
+	return 0;
 }
