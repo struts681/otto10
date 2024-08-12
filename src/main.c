@@ -22,7 +22,7 @@
 #define DEFAULT_ID_CSV "/home/amelia/otto10/database/ids.csv"
 #define DEFAULT_SEGUE_CSV "/home/amelia/otto10/database/segues.csv"
 
-#define DEFAULT_MUSIC_DIR "/home/amelia/Music/"
+#define DEFAULT_MUSIC_DIR "/home/amelia/otto10/music/"
 #define DEFAULT_ID_DIR "/home/amelia/otto10/ids/"
 #define DEFAULT_SEGUE_DIR "/home/amelia/otto10/segues/"
 
@@ -293,6 +293,7 @@ int main(int argc, char *argv[]) {
 
 					remaining_time = remaining_time_in_sound(&engine, &sound);
 					printf("\r%2.2f remaining in the song", remaining_time);
+					fflush(stdout);
 				}
 
 				else {
@@ -376,7 +377,7 @@ int main(int argc, char *argv[]) {
 				else printf("successfully initialized a sound from %s\n", sound_path);
 
 				//fade in & start
-				ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
+				//ma_sound_set_fade_in_milliseconds(&sound, 0, 1, fade_duration * 1000);
 				ma_sound_start(&sound);
 
 				//go back to time watch mode
